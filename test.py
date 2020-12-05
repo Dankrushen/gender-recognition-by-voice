@@ -6,12 +6,13 @@ import numpy as np
 from sys import byteorder
 from array import array
 from struct import pack
+import time
 
 
 THRESHOLD = 500
 CHUNK_SIZE = 1024
 FORMAT = pyaudio.paInt16
-RATE = 16000
+RATE = 44100
 
 SILENCE = 30
 
@@ -180,12 +181,15 @@ if __name__ == "__main__":
         file = "test.wav"
         # record the file (start talking)
         record_to_file(file)
+    tic = time.perf_counter()
     # extract features and reshape it
     features = extract_feature(file, mel=True).reshape(1, -1)
     # predict the gender!
     male_prob = model.predict(features)[0][0]
     female_prob = 1 - male_prob
     gender = "male" if male_prob > female_prob else "female"
+    toc = time.perf_counter()
     # show the result!
     print("Result:", gender)
     print(f"Probabilities:     Male: {male_prob*100:.2f}%    Female: {female_prob*100:.2f}%")
+    print(f"Inference Time: {toc - tic:0.4f} seconds")
